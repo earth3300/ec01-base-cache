@@ -1,4 +1,19 @@
 <?php
+/**
+ * File Level Description.
+ *
+ * Standards:
+ *  Coding: https://www.php-fig.org/psr/
+ *  Documentation: http://docs.phpdoc.org/guides/docblocks.html
+ *
+ * Exceptions:
+ *  Spaces: 2 (not 4) [Githubs standard is 2 spaces]
+ *
+ * File: advanced-cache.php
+ * Created: 2019-02-24
+ * Updated: 2019-02-25
+ * Time: 11:03 EST
+ */
 
 // check if request method is GET
 if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] != 'GET' ) {
@@ -10,34 +25,10 @@ $path = _ce_file_path();
 
 // path to cached variants
 $path_html = $path . 'index.html';
-$path_gzip = $path . 'index.html.gz';
-$path_webp_html = $path . 'index-webp.html';
-$path_webp_gzip = $path . 'index-webp.html.gz';
-
 
 // if we don't have a cache copy, we do not need to proceed
 if ( ! is_readable( $path_html ) ) {
     return false;
-}
-
-// check if there are settings passed out to us
-$settings_file = sprintf('%s-%s%s.json',
-    SITE_CONFIG_DIR . "/cache/cache-enabler-advcache",
-    parse_url(
-        'http://' . strtolower($_SERVER['HTTP_HOST']),
-        PHP_URL_HOST
-    ),
-    is_multisite() ? '-' . abs(intval($blog_id)) : ''
-);
-$settings = _read_settings($settings_file);
-
-// if post path excluded
-if ( !empty($settings['excl_regexp']) ) {
-    $url_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-    if ( preg_match($settings['excl_regexp'], $url_path) ) {
-        return false;
-    }
 }
 
 // check GET variables
@@ -176,45 +167,4 @@ function _ce_file_path($path = NULL) {
   $path = str_replace( '/a/a', '/a', $path );
 
   return $path;
-}
-
-/*
-function _ce_file_path($path = NULL) {
-    $path = sprintf(
-        '%s%s%s%s',
-        WP_CONTENT_DIR . '/cache/cache-enabler',
-        DIRECTORY_SEPARATOR,
-        parse_url(
-            'http://' .strtolower($_SERVER['HTTP_HOST']),
-            PHP_URL_HOST
-        ),
-        parse_url(
-            ( $path ? $path : $_SERVER['REQUEST_URI'] ),
-            PHP_URL_PATH
-        )
-    );
-
-    if ( is_file($path) > 0 ) {
-        header( $_SERVER['SERVER_PROTOCOL'] . ' 404 Not Found', true, 404 );
-        exit;
-    }
-
-    // add trailing slash
-    $path = rtrim( $path, '/\\' ) . '/';
-
-    return $path;
-}
-*/
-// read settings file
-function _read_settings($settings_file) {
-    if (! file_exists($settings_file) ) {
-        return [];
-    }
-
-    if ( ! $settings = json_decode(file_get_contents($settings_file), true) ) {
-        // if there is an error reading our settings
-        return [];
-    }
-
-    return $settings;
 }
