@@ -1,14 +1,23 @@
 <?php
 /*
 Plugin Name: WP Bundle Base Cache
-Text Domain: cache-enabler
+Text Domain: base-cache
 Description: This has been modified from the Cache Enabler plugin to cache files in a directory only one level down from the root. It currently retains all other functionality. Requires bundle configuration constants to work.
 Author: wp.cbos.ca
 Author URI: http://wp.cbos.ca
 License: GPLv3+
 Version: 1.4.0
 
+Standards:
+ Coding: https://www.php-fig.org/psr/
+ Documentation: http://docs.phpdoc.org/guides/docblocks.html
+
+Exceptions:
+ Spaces: 2 (not 4) [Githubs standard is 2 spaces]
+
 Note: credits and text may need to be updated to conform to standards.
+*/
+
 /*
 Original Author: KeyCDN
 Original Author URI: https://www.keycdn.com
@@ -36,61 +45,68 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-
-// exit
+/** No direct access. */
 defined('ABSPATH') OR exit;
 
-
 // constants
-define('CE_FILE', __FILE__);
-define('CE_DIR', dirname(__FILE__));
-define('CE_BASE', plugin_basename(__FILE__));
-define('CE_CACHE_DIR', SITE_CACHE_PATH );
-define('CE_MIN_WP', '4.1');
+define('BC_FILE', __FILE__);
+define('BC_PATH', __DIR__);
+define('BC_PLUGIN_BASE', plugin_basename(__FILE__));
+
+require_once( __DIR__ . '/inc' . '/base-cache-article.php' );
 
 // hooks
 add_action(
     'plugins_loaded',
     array(
-        'Cache_Enabler',
+        'BaseCacheCore',
         'instance'
     )
 );
 register_activation_hook(
     __FILE__,
     array(
-        'Cache_Enabler',
-        'on_activation'
+        'BaseCacheCore',
+        'onActivation'
     )
 );
 register_deactivation_hook(
     __FILE__,
     array(
-        'Cache_Enabler',
-        'on_deactivation'
+        'BaseCacheCore',
+        'onDeactivation'
     )
 );
 register_uninstall_hook(
     __FILE__,
     array(
-        'Cache_Enabler',
-        'on_uninstall'
+        'BaseCacheCore',
+        'onUninstall'
     )
 );
 
-
 // autoload register
-spl_autoload_register('cache_autoload');
+spl_autoload_register('base_cache_autoload');
 
-// autoload function
-function cache_autoload($class) {
-    if ( in_array($class, array('Cache_Enabler', 'Cache_Enabler_Disk')) ) {
-        require_once(
-            sprintf(
-                '%s/inc/%s.class.php',
-                CE_DIR,
-                strtolower($class)
-            )
-        );
+/**
+ * Base Cache Autoload
+ *
+ * @param array $class [description]
+ * @return void
+ */
+function base_cache_autoload($class) {
+  if ( in_array($class, array('BaseCacheCore', 'BaseCacheDisk') ) ) {
+    $arr = [
+      'BaseCacheCore' => 'base-cache-core',
+      'BaseCacheDisk' => 'base-cache-disk',
+    ];
+    $file = sprintf(
+      '%s/inc/class-%s.php',
+      BC_PATH,
+      $arr[$class]
+    );
+    if( file_exists( $file ) ) {
+      require_once( $file );
     }
+  }
 }
