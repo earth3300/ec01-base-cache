@@ -16,34 +16,6 @@
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! defined ('SITE_PATH' ) ) {
-  /** The path to the root of the site. */
-  define( 'SITE_PATH', $_SERVER['DOCUMENT_ROOT'] );
-}
-if ( ! defined ('SITE_CACHE_DIR' ) ) {
-  /** The directory in which the cached files are printed. */
-  define( 'SITE_CACHE_DIR', 'html' );
-}
-if ( ! defined ('SITE_CACHE_PATH' ) ) {
-  /** The path in which the cached files are printed. */
-  define( 'SITE_CACHE_PATH', $_SERVER['DOCUMENT_ROOT'] . SITE_CACHE_DIR );
-}
-
-if ( ! defined ('SITE_PAGE_DIR' ) ) {
-  /**  Default: '/article'.  Commonly referred to as 'post'. */
-  define( 'SITE_PAGE_DIR', '/a' );
-}
-
-if ( ! defined ('SITE_ARTICLE_DIR' ) ) {
-  /**  Default: '/article'.  Commonly referred to as 'post'. */
-  define( 'SITE_ARTICLE_DIR', '/a' );
-}
-
-if ( ! defined ('SITE_ARTICLE_FILE' ) ) {
-  /**  Default: article.html  Store only the article part here. */
-  define( 'SITE_ARTICLE_FILE', 'article.html' );
-}
-
 /** On save post, cache post */
 add_action( 'save_post', 'wp_bundle_cache_content' );
 
@@ -67,7 +39,8 @@ add_action( 'trash_post', 'wp_bundle_cache_trash_post' );
  */
 function wp_bundle_cache_content( $post_id )
 {
-  if ( ! wp_is_post_revision( $post_id ) && ! wp_is_post_autosave( $post_id ) ) { //and not trash
+  if ( ! wp_is_post_revision( $post_id ) && ! wp_is_post_autosave( $post_id ) ) {
+    //and not trash
     $post = get_post( $post_id );
     $slug = get_post_field( 'post_name', $post_id );
     if ( $path = wp_bundle_get_cache_path( $post_id, $post -> post_type, $slug ) ) {
@@ -89,7 +62,7 @@ function wp_bundle_cache_content( $post_id )
  * Include a time string (hidden) for reference purposes.
  * @since 2018.07.01
  * @param array $post
- * @return str
+ * @return string
  */
 function wp_bundle_content_wrap( $post )
 {
@@ -110,6 +83,8 @@ function wp_bundle_content_wrap( $post )
  */
 function wp_bundle_get_cache_path( $post_id, $post_type, $slug )
 {
+
+  $path = '';
   if ( strpos( $slug, 'home' ) !== false || strpos( $slug, 'front-page' ) !== false ) {
     $path = SITE_CACHE_PATH;
   } elseif ( 'post' == $post_type ) {
@@ -146,7 +121,8 @@ function wp_bundle_cache_trash_post( $post_id ) {
     $post = get_post( $post_id );
     $slug = get_post_field( 'post_name', $post -> ID );
     if ( $path = wp_bundle_get_cache_path( $post -> ID, $slug ) ) {
-      $file = $path . '/' . SITE_INDEX_FILE;
+      $file = $path . SITE_INDEX_FILE;
+
       if ( $result = wp_bundle_refresh_cache_path( $path, $file ) ){
         if ( $str = $post->contents ) {
           unlink( $file );
