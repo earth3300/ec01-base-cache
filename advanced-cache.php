@@ -15,6 +15,10 @@
  * Time: 11:03 EST
  */
 
+ if ( ! defined( 'SITE_CACHE_PATH' ) ) {
+   define( 'SITE_CACHE_PATH', rtrim( $_SERVER['DOCUMENT_ROOT'], '/' ) . '/a' );
+ }
+
 // check if request method is GET
 if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || $_SERVER['REQUEST_METHOD'] != 'GET' ) {
     return false;
