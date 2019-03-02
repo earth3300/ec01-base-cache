@@ -18,6 +18,11 @@
 /** No direct access. */
 defined('ABSPATH') OR exit;
 
+if( ! defined( 'SITE_CACHE_PATH' ) ) {
+  /** Site Cache Path */
+  define('SITE_CACHE_PATH', rtrim( $_SERVER['DOCUMENT_ROOT'], '/' ) . '/a' );
+}
+
 /**
  * Base Cache
  *
@@ -322,31 +327,11 @@ class BaseCacheCore
    */
   public static function onActivation()
   {
-    // multisite and network
-    if ( is_multisite() && ! empty($_GET['networkwide']) ){
-      // blog ids
-      $ids = self::_get_blog_ids();
 
-      // switch to blog
-      foreach ($ids as $id){
-        switch_to_blog($id);
-        self::installBackend();
-      }
-
-      // restore blog
-      restore_current_blog();
-
-    } else {
-      self::installBackend();
-    }
-
-    if ( ! defined( 'WP_CACHE' ) || ! WP_CACHE ) {
-      // set WP_CACHE
-      self::_set_wp_cache(true);
-    }
+    self::installBackend();
 
     // copy advanced cache file
-    copy(CE_DIR . '/advanced-cache.php', WP_CONTENT_DIR . '/advanced-cache.php');
+    copy( BC_DIR . '/advanced-cache.php', WP_CONTENT_DIR . '/advanced-cache.php');
   }
   /**
    * installation options
@@ -727,7 +712,7 @@ class BaseCacheCore
         'publish_' .$post_type,
         array(
           __CLASS__,
-          'publish_post_types'
+          'publishPostTypes'
         ),
         10,
         2
